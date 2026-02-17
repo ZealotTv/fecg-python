@@ -33,8 +33,6 @@ def rrprocess(
         (Hw[0 : np.floor(n / 2).astype(int) - 1], Hw[np.floor(n / 2).astype(int) :: -1])
     )
     Sw = (sfrr / 2) * np.sqrt(Hw0)
-    print(np.floor(n / 2))
-
     ph0 = 2 * np.pi * np.ones(np.floor(n / 2).astype(int) - 1)
     ph = np.concatenate(([0], ph0.flatten(), [0], -np.flipud(ph0).flatten()))
     SwC = Sw * np.exp(1j * ph)
@@ -44,6 +42,3 @@ def rrprocess(
     ratio = rrstd / xstd
     rr = rrmean + x * ratio
     return rr
-
-
-print(rrprocess())

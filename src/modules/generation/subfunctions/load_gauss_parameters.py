@@ -24,12 +24,10 @@ def load_gauss_parameters(
                 model = vcgList[vcgmodel]
                 with open(f"{data_out_path}/{model}_{dimention}.pkl", "rb") as f:
                     data = pickle.load(f)
-                    print(data)
                     return GaussParameters(*data)
             case "ectopic":
                 with open(f"{data_out_path}/ectopic_{dimention}.pkl", "rb") as f:
                     data = pickle.load(f)
-                    print(data)
                     return GaussParameters(*data)
     except Exception:
         print("Smth gone wrong!")
