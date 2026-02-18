@@ -22,7 +22,7 @@ def rrprocess(
     rrstd = 60 * hrstd / (hrmean * hrmean)
 
     df = sfrr / n
-    w = np.arange(0, n) * 2 * np.pi * df
+    w = np.arange(n) * 2 * np.pi * df
     dw1 = w - w1
     dw2 = w - w2
 
@@ -30,15 +30,13 @@ def rrprocess(
     Hw2 = sig2 * np.exp(-0.5 * (dw2 / c2) ** 2) / np.sqrt(2 * np.pi * c2**2)
     Hw = Hw1 + Hw2
     Hw0 = np.concatenate(
-        (Hw[0 : np.floor(n / 2).astype(int) - 1], Hw[np.floor(n / 2).astype(int) :: -1])
+        (Hw[: np.floor(n / 2).astype(int)], Hw[np.floor(n / 2).astype(int) - 1 :: -1])
     )
     Sw = (sfrr / 2) * np.sqrt(Hw0)
-    ph0 = 2 * np.pi * np.ones(np.floor(n / 2).astype(int) - 1)
-    ph = np.concatenate(([0], ph0.flatten(), [0], -np.flipud(ph0).flatten()))
+    ph0 = 2 * np.pi * np.random.rand(np.floor(n / 2).astype(int) - 1)
+    ph = np.concatenate(([0], ph0.flatten(), [0], -np.flip(ph0)))
     SwC = Sw * np.exp(1j * ph)
     x = (1 / n) * np.real(np.fft.ifft(SwC))
 
-    xstd = np.std(x)
-    ratio = rrstd / xstd
-    rr = rrmean + x * ratio
+    rr = rrmean + x * (rrstd / np.std(x))
     return rr

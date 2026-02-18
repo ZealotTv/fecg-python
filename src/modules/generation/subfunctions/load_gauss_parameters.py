@@ -1,5 +1,6 @@
-from datatypes.gauss_parameters import GaussParameters
 import pickle
+
+from datatypes import GaussParameters
 
 data_out_path = "src/modules/generation/subfunctions/data/vcg_sets_my/"
 

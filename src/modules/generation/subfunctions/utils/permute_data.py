@@ -1,8 +1,8 @@
-from scipy.io import loadmat
 import pickle
 from pathlib import Path
-import numpy as np
 
+import numpy as np
+from scipy.io import loadmat
 
 data_path = "src/modules/generation/subfunctions/data/vcg_sets/"
 data_out_path = "src/modules/generation/subfunctions/data/vcg_sets_my/"
