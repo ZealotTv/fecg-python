@@ -4,8 +4,8 @@ from pathlib import Path
 import numpy as np
 from scipy.io import loadmat
 
-data_path = "src/modules/generation/subfunctions/data/vcg_sets/"
-data_out_path = "src/modules/generation/subfunctions/data/vcg_sets_my/"
+data_path = "CHANGE_ME"
+data_out_path = "CHANGE_ME"
 Path(data_out_path).mkdir(parents=True, exist_ok=True)
 
 p = Path(data_path)
@@ -15,9 +15,9 @@ for file in p.iterdir():
         continue
     fsplit = filename.split("_")
     data = loadmat(f"{data_path}/{filename}.mat")
-    alpha = np.array(data["Param"][1])
-    beta = np.array(data["Param"][2])
-    theta = np.array(data["Param"][0])
+    alpha = data["Param"][1]
+    beta = data["Param"][2]
+    theta = data["Param"][0]
 
     with open(f"{data_out_path}/{fsplit[1]}_{fsplit[-1]}.pkl", "wb") as f:
         pickle.dump([alpha, beta, theta], f)

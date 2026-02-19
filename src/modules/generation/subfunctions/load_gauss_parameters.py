@@ -2,7 +2,7 @@ import pickle
 
 from datatypes import GaussParameters
 
-data_out_path = "src/modules/generation/subfunctions/data/vcg_sets_my/"
+data_path = "src/modules/generation/subfunctions/data/vcg_sets/"
 
 
 def load_gauss_parameters(
@@ -23,11 +23,11 @@ def load_gauss_parameters(
         match type:
             case "normal":
                 model = vcgList[vcgmodel]
-                with open(f"{data_out_path}/{model}_{dimention}.pkl", "rb") as f:
+                with open(f"{data_path}/{model}_{dimention}.pkl", "rb") as f:
                     data = pickle.load(f)
                     return GaussParameters(*data)
             case "ectopic":
-                with open(f"{data_out_path}/ectopic_{dimention}.pkl", "rb") as f:
+                with open(f"{data_path}/ectopic_{dimention}.pkl", "rb") as f:
                     data = pickle.load(f)
                     return GaussParameters(*data)
     except Exception:
