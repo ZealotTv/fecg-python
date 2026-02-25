@@ -3,6 +3,7 @@ from subfunctions import (
     GaussParameters,
     HRVParameters,
     SimulationParameters,
+    GeneratorOut,
     add_cardiacdipole,
     build_gauss_parameters,
     cart2pol,
@@ -14,7 +15,7 @@ from subfunctions import (
 )
 
 
-def generate_ecg(params: SimulationParameters):
+def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     elpos = np.vstack([params.elpos, params.refpose])
     gp_m = {"norm": build_gauss_parameters("normal", params.mvcg)}
     if params.mectb:
@@ -69,60 +70,66 @@ def generate_ecg(params: SimulationParameters):
     m_model.type = 1
     L_f = np.eye(3)
     R_f = 0.1
-    # f_model = []
-    # selvcgf = []
+    f_model = [None] * params.NB_FOETUSES
+    w_f = [None] * params.NB_FOETUSES
+    theta_f = [None] * params.NB_FOETUSES
+    gp_f = [None] * params.NB_FOETUSES
+    selvcgf = [None] * params.NB_FOETUSES
 
-    # for fet in range(NB_FOETUSES):
-    #     print(f"Generating model for fetus {fet + 1} ..")
+    for fet in range(params.NB_FOETUSES):
+        fh_cart = param.fheart[fet].copy()
+        fh_cart[0], fh_cart[1] = pol2cart(param.fheart[fet][0], param.fheart[fet][1])
 
-    #     fh_cart = param.fheart[fet].copy()
-    #     fh_cart[0], fh_cart[1] = pol2cart(param.fheart[fet][0], param.fheart[fet][1])
+        if param.posdev:
+            xp, yp, zp = sph2cart(
+                2 * np.pi * np.random.rand(),
+                np.arcsin(2 * np.random.rand() - 1),
+                0.1 * np.random.rand(),
+            )
+            posf_start = np.array([xp, yp, zp]) + fh_cart
+        else:
+            posf_start = fh_cart
 
-    #     if param.posdev:
-    #         xp, yp, zp = sph2cart(
-    #             2 * np.pi * np.random.rand(),
-    #             np.arcsin(2 * np.random.rand() - 1),
-    #             0.1 * np.random.rand(),
-    #         )
-    #         posf_start = np.array([xp, yp, zp]) + fh_cart
-    #     else:
-    #         posf_start = fh_cart
+        xl = np.linspace(0, posf_start[0])
+        yl = np.linspace(0, posf_start[1])
+        zl = np.linspace(0, posf_start[2])
+        idx = np.random.randint(50, 101, 3)
+        posf_end = np.array([xl[idx[0]], yl[idx[1]], zl[idx[2]]])
+        gp_f = {"norm": build_gauss_parameters("normal", params.fvcg[fet])}
+        if params.mectb:
+            gp_f["ectopic"] = build_gauss_parameters("ectopic")
+            for axis in gp_f["ectopic"]:
+                for param in gp_f["ectopic"][axis]:
+                    VCGect = ecg_model(GaussParameters(**gp_f["ectopic"][axis]))
+                    VCGnorm = ecg_model(GaussParameters(**gp_f["norm"][axis]))
+                    gp_f["ectopic"][axis][param] *= np.max(np.abs(VCGnorm)) / np.max(
+                        np.abs(VCGect)
+                    )
+        theta0_f = (2 * np.random.rand() - 1) * np.pi
+        HRV = HRVParameters(
+            hr=params.fhr[fet],
+            flo=params.fres[fet],
+            acc=params.facc[fet],
+            typeacc=params.ftypeacc[fet],
+            accmean=params.faccmean[fet],
+            accstd=params.faccstd[fet],
+        )
+        theta_f[fet], w_f[fet] = generate_hrv(HRV, params.n, params.fs, theta0_f)
+        traj = traject_generator(param.n, posf_start, posf_end, param.ftraj[fet])
 
-    #     xl = np.linspace(0, posf_start[0])
-    #     yl = np.linspace(0, posf_start[1])
-    #     zl = np.linspace(0, posf_start[2])
-    #     idx = np.random.randint(50, 101, 3)
-    #     posf_end = np.array([xl[idx[0]], yl[idx[1]], zl[idx[2]]])
-
-    #     gp_f = SimpleNamespace()
-    #     gp_f.norm, sel = load_gparam(param.fvcg[fet], "normal")
-    #     selvcgf.append(sel)
-
-    #     # HRV
-    #     theta0_f = (2 * np.random.rand() - 1) * np.pi if param.posdev else -np.pi / 2
-    #     strhrv.hr = param.fhr[fet]
-    #     strhrv.flo = param.fres[fet]
-    #     strhrv.acc = param.facc[fet]
-
-    #     theta_f, w_f = generate_hrv(strhrv, param.n, param.fs, theta0_f)
-
-    #     traj = traject_generator(param.n, posf_start, posf_end, param.ftraj[fet])
-
-    #     model = add_cardiacdipole(
-    #         param.n,
-    #         param.fs,
-    #         gp_f,
-    #         np.eye(3),
-    #         theta_f,
-    #         w_f,
-    #         param.fres[fet],
-    #         SimpleNamespace(x=0, y=0, z=0),
-    #         epos,
-    #         traj,
-    #         0,
-    #     )
-    #     model["type"] = 2
-    #     f_model.append(model)
+        f_model[fet] = add_cardiacdipole(
+            param.n,
+            param.fs,
+            gp_f,
+            L_f,
+            theta_f,
+            w_f,
+            param.fres[fet],
+            #            SimpleNamespace(x=0, y=0, z=0),
+            epos,
+            traj,
+        )
+        f_model[fet].type = 2
     # # =========================
     # # == NOISE
     # # =========================

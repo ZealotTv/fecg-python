@@ -7,6 +7,7 @@ from .datatypes import (
     GaussParameters,
     HRVParameters,
     SimulationParameters,
+    GeneratorOut,
 )
 from .ecg_model import ecg_model
 from .generate_ecg_mixture import generate_ecg_mixture
@@ -20,18 +21,24 @@ __all__ = [
     "HRVParameters",
     "SimulationParameters",
     "DmodelParameters",
-    "load_gauss_parameters",
+    "GeneratorOut",
+
     "ecg_model",
+    "generate_ecg_mixture",
+
+    "generate_hrv",
+    "traject_generator",
+
     "add_cardiacdipole",
     "add_noisedipole",
+
     "build_gauss_parameters",
+    "load_gauss_parameters",
+    "phase2qrs",
+
     "pol2cart",
     "cart2pol",
     "sph2cart",
     "cart2sph",
-    "generate_hrv",
-    "traject_generator",
-    "phase2qrs",
-    "generate_ecg_mixture",
 ]
-version = "1.0.0"
+__version__ = "1.0.0"
