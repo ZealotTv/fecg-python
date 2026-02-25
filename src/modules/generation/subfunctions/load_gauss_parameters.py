@@ -23,6 +23,7 @@ def load_gauss_parameters(
         match type:
             case "normal":
                 model = vcgList[vcgmodel]
+
                 with open(f"{data_path}/{model}_{dimention}.pkl", "rb") as f:
                     data = pickle.load(f)
                     return GaussParameters(*data)

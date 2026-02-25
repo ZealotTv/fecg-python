@@ -1,8 +1,9 @@
 import numpy as np
+from scipy.interpolate import interp1d
+
 from .datatypes import HRVParameters
 from .FECGSYN_kf_phasecalc import FECGSYN_kf_phasecalc
 from .rrprocess import rrprocess
-from scipy.interpolate import interp1d
 
 
 def generate_hrv(

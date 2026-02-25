@@ -1,8 +1,9 @@
 import numpy as np
+from scipy.signal import butter, filtfilt
+
 from .datatypes import DmodelParameters
 from .generate_breathing import generate_breathing
 from .rotate_xyz import rotate_xyz
-from scipy.signal import butter, filtfilt
 
 
 def add_cardiacdipole(
@@ -46,7 +47,6 @@ def add_cardiacdipole(
         brwave = np.zeros(N)
     else:
         brwave = generate_breathing(fs, N, fres, 0)
-
     if fres == 0 and traj.shape[0] == 1:
         diff = epos - traj
         den_norm = 1.0 / np.sqrt(np.sum(diff**2, axis=1)) ** 3
@@ -77,32 +77,32 @@ def add_cardiacdipole(
         def angle_diff(th, center):
             return np.mod(th - center + np.pi, 2 * np.pi) - np.pi
 
-        dthetaix = angle_diff(theta[i], np.array(gp["theta"]["x"]))
-        dthetaiy = angle_diff(theta[i], np.array(gp["theta"]["y"]))
-        dthetaiz = angle_diff(theta[i], np.array(gp["theta"]["z"]))
+        dthetaix = angle_diff(theta[i], np.array(gp["x"]["theta"]))
+        dthetaiy = angle_diff(theta[i], np.array(gp["y"]["theta"]))
+        dthetaiz = angle_diff(theta[i], np.array(gp["z"]["theta"]))
 
         X -= dt * np.sum(
             w[i]
-            * np.array(gp["alpha"]["x"])
-            / (np.array(gp["beta"]["x"]) ** 2)
+            * np.array(gp["x"]["alpha"])
+            / (np.array(gp["x"]["beta"]) ** 2)
             * dthetaix
-            * np.exp(-(dthetaix**2) / (2 * np.array(gp["beta"]["x"]) ** 2))
+            * np.exp(-(dthetaix**2) / (2 * np.array(gp["x"]["beta"]) ** 2))
         )
 
         Y -= dt * np.sum(
             w[i]
-            * np.array(gp["alpha"]["y"])
-            / (np.array(gp["beta"]["y"]) ** 2)
+            * np.array(gp["y"]["alpha"])
+            / (np.array(gp["y"]["beta"]) ** 2)
             * dthetaiy
-            * np.exp(-(dthetaiy**2) / (2 * np.array(gp["beta"]["y"]) ** 2))
+            * np.exp(-(dthetaiy**2) / (2 * np.array(gp["y"]["beta"]) ** 2))
         )
 
         Z -= dt * np.sum(
             w[i]
-            * np.array(gp["alpha"]["z"])
-            / (np.array(gp["beta"]["z"]) ** 2)
+            * np.array(gp["z"]["alpha"])
+            / (np.array(gp["z"]["beta"]) ** 2)
             * dthetaiz
-            * np.exp(-(dthetaiz**2) / (2 * np.array(gp["beta"]["z"]) ** 2))
+            * np.exp(-(dthetaiz**2) / (2 * np.array(gp["z"]["beta"]) ** 2))
         )
 
         thetax = R0[0] + RESP_ANG_X * brwave[i]
@@ -112,13 +112,12 @@ def add_cardiacdipole(
         R = rotate_xyz(thetax, thetay, thetaz)
 
         VCG[:, i] = R @ L @ np.array([X, Y, Z])
+
         if traj.shape[0] > 1:
             dr = dpos[i]
             diff = epos - dr
             den_norm = 1.0 / np.sqrt(np.sum(diff**2, axis=1)) ** 3
             h_1 = np.diag(den_norm) @ diff
-            print(h_1.shape)
-            print(H[:, :, 0].shape)
             H[:, :, i] = h_1
 
     B, A = butter(5, 0.7 * 2 / fs, btype="lowpass")

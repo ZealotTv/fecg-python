@@ -43,21 +43,21 @@ class SimulationParameters:
     fname: str = "aecg"
     mres: int = 0
     fres: np.ndarray = field(init=False)
-    mvcg: np.ndarray = field(default_factory=lambda: np.random.randint(1, 9))
+    mvcg: np.ndarray = field(default_factory=lambda: np.random.randint(0, 8))
     fvcg: np.ndarray = field(init=False)
-    evcg: np.ndarray = field(default_factory=lambda: np.random.randint(1, 4))
+    evcg: np.ndarray = field(default_factory=lambda: np.random.randint(0, 3))
     posdev: int = 1
     mectb: int = 0
     fectb: int = 0
 
     def __post_init__(self):
         self.NB_FOETUSES = np.size(self.fheart, 0)
-        self.noise_fct = np.matlib.repmat(1, 1, len(self.ntype))
-        self.fhr = np.matlib.repmat(150, self.NB_FOETUSES, 1)
+        self.noise_fct = np.tile(1, (1, len(self.ntype)))
+        self.fhr = np.tile(150, (self.NB_FOETUSES, 1))
         self.facc = np.zeros(self.NB_FOETUSES)
-        self.ftypeacc = np.matlib.repmat("nsr", 1, self.NB_FOETUSES)
-        self.faccmean = np.matlib.repmat(0, 1, self.NB_FOETUSES)
-        self.faccstd = np.matlib.repmat(1, 1, self.NB_FOETUSES)
-        self.ftraj = np.matlib.repmat("none", 1, self.NB_FOETUSES)
+        self.ftypeacc = np.tile("nsr", (1, self.NB_FOETUSES))
+        self.faccmean = np.tile(0, (1, self.NB_FOETUSES))
+        self.faccstd = np.tile(1, (1, self.NB_FOETUSES))
+        self.ftraj = np.tile("none", (1, self.NB_FOETUSES))
         self.fres = np.zeros(self.NB_FOETUSES)
-        self.fvcg = np.random.randint(1, 9, (self.NB_FOETUSES, 1))
+        self.fvcg = np.random.randint(0, 8, (self.NB_FOETUSES, 1))
