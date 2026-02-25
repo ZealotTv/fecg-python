@@ -69,5 +69,5 @@ def add_noisedipole(
     diff = epos - np.tile(noisepos, (NB_EL, 1))
     den_norm = np.diag(1 / np.sqrt(np.sum(diff**2, axis=1)) ** 3)
     H = den_norm @ diff
-    dmodel = DmodelParameters(H, noise_ar, 3)
+    dmodel = DmodelParameters(H=H, VCG=noise_ar, ntype=3)
     return dmodel
