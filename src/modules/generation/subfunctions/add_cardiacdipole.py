@@ -1,10 +1,8 @@
 import numpy as np
+from .datatypes import DmodelParameters
+from .generate_breathing import generate_breathing
+from .rotate_xyz import rotate_xyz
 from scipy.signal import butter, filtfilt
-
-# from numpy.polynomial.polynomial import polyfit, polyval
-from generate_breathing import generate_breathing
-from rotate_xyz import rotate_xyz
-from datatypes import DmodelParameters
 
 
 def add_cardiacdipole(
@@ -31,11 +29,6 @@ def add_cardiacdipole(
         STM = None
 
     gp_norm = gp_all["norm"]
-
-    # if np.any(np.sqrt(traj[:, 0] ** 2 + traj[:, 1] ** 2) > 0.5) or np.any(
-    #     np.abs(traj[:, 2]) > 0.5
-    # ):
-    #     raise ValueError("Trajectory extrapolates the volume conductor.")
 
     RESP_ANG_X = 2 * 0.1
     RESP_ANG_Y = 2 * 0.08

@@ -1,5 +1,5 @@
 import numpy as np
-from datatypes import GaussParameters
+from .datatypes import GaussParameters
 
 
 def ecg_model(ecg_parameters: GaussParameters, phasemn: np.linspace) -> np.linspace:

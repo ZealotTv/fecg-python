@@ -1,7 +1,7 @@
 import numpy as np
-from datatypes import HRVParameters
-from FECGSYN_kf_phasecalc import FECGSYN_kf_phasecalc
-from rrprocess import rrprocess
+from .datatypes import HRVParameters
+from .FECGSYN_kf_phasecalc import FECGSYN_kf_phasecalc
+from .rrprocess import rrprocess
 from scipy.interpolate import interp1d
 
 

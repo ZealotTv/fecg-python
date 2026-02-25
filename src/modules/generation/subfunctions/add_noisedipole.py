@@ -1,8 +1,8 @@
 import pickle
 
 import numpy as np
-from aryule import aryule
-from datatypes import DmodelParameters
+from .aryule import aryule
+from .datatypes import DmodelParameters
 from resampy import resample
 from scipy.signal import butter, filtfilt, zpk2tf
 from sklearn.decomposition import PCA
