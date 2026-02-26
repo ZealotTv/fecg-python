@@ -30,4 +30,4 @@ def traject_generator(
         case _:
             print("TrajectGenerator: Unknown trajectory type")
 
-    return traj
+    return np.array([traj])

@@ -23,6 +23,7 @@ def add_noisedipole(
     NP_NSTDB = 20 * FS_NSTDB
     LG_NSTDB = FS_NSTDB * 29 * 60 - NP_NSTDB
     NB_EL = np.size(epos, 0)
+
     start = round(LG_NSTDB * np.random.rand()) - 1
     stop = start + NP_NSTDB
     with open(f"{data_path}/{ntype}.pkl", "rb") as f:
@@ -70,5 +71,5 @@ def add_noisedipole(
     diff = epos - np.tile(noisepos, (NB_EL, 1))
     den_norm = np.diag(1 / np.sqrt(np.sum(diff**2, axis=1)) ** 3)
     H = den_norm @ diff
-    dmodel = DmodelParameters(H=H, VCG=noise_ar, ntype=3)
+    dmodel = DmodelParameters(H=H, VCG=noise_ar.T, ntype=3)
     return dmodel

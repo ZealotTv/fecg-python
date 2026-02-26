@@ -3,15 +3,14 @@ import numpy as np
 
 def generate_ecg_mixture(SNRfm, SNRmn, mqrs, fqrs, fs, *sources):
     NB_EL = sources[0].H.shape[0]
-    NB_SIG2MIX = len(sources)
     NB_SAMPS = sources[0].VCG.shape[1]
 
     NB_FOETUSES = 0
     NB_NOISE = 0
     for src in sources:
-        if src.type == 2:
+        if src.ntype == 2:
             NB_FOETUSES += 1
-        if src.type == 3:
+        if src.ntype == 3:
             NB_NOISE += 1
 
     MHR = 60
@@ -33,14 +32,14 @@ def generate_ecg_mixture(SNRfm, SNRmn, mqrs, fqrs, fs, *sources):
             signal = src.H @ src.VCG
 
         # route by type
-        if src.type == 1:  # maternal
+        if src.ntype == 1:  # maternal
             mecg = signal
 
-        elif src.type == 2:  # fetal
+        elif src.ntype == 2:  # fetal
             cpt2 += 1
             signalf[(cpt2 - 1) * NB_EL : cpt2 * NB_EL, :] = signal
 
-        elif src.type == 3:  # noise
+        elif src.ntype == 3:  # noise
             cpt3 += 1
             signal = signal * src.SNRfct  # bsxfun equivalent
             signaln.append(signal)
@@ -78,7 +77,7 @@ def generate_ecg_mixture(SNRfm, SNRmn, mqrs, fqrs, fs, *sources):
         sigpow = np.sum(np.sum(sig, axis=2) ** 2, axis=1)
         meannoisepow = np.mean(sigpow)
 
-        p = np.sqrt(powerm / meannoisepow) * 10(-SNRmn / 20)
+        p = np.sqrt(powerm / meannoisepow) * 10 * (-SNRmn / 20)
 
         for i, nsrc in enumerate(signaln):
             nblock = noisegain[i] * (p * nsrc)

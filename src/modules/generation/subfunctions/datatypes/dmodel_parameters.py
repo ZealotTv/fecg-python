@@ -7,9 +7,8 @@ import numpy as np
 class DmodelParameters:
     H: np.ndarray
     VCG: np.ndarray
-    theta: float
-    traj: np.ndarray
-    stm: np.ndarray
+    theta: np.ndarray = field(default_factory=lambda: np.linspace(-np.pi, np.pi, 250))
+    traj: np.ndarray = field(default_factory=lambda: np.linspace(-np.pi, np.pi, 250))
     rax: float = 0.2
     ray: float = 0.16
     raz: float = 0.14

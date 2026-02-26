@@ -53,7 +53,6 @@ def add_cardiacdipole(
         H = den_norm[:, None] * diff
     else:
         H = np.zeros((NB_EL, 3, N))
-
     if fres == 0:
         dpos = traj
     else:
@@ -62,7 +61,6 @@ def add_cardiacdipole(
         )
 
     crst = X = Y = Z = 0
-
     for i in range(N):
         if ect and i in ncy:
             rd_nb = np.random.rand()

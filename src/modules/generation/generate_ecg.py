@@ -5,13 +5,16 @@ from subfunctions import (
     SimulationParameters,
     GeneratorOut,
     add_cardiacdipole,
+    generate_ecg_mixture,
     build_gauss_parameters,
     cart2pol,
     ecg_model,
     generate_hrv,
+    phase2qrs,
     pol2cart,
     sph2cart,
     traject_generator,
+    add_noisedipole,
 )
 
 
@@ -57,44 +60,43 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     if params.mtraj == "none":
         mtraj = np.array([mh_cart])
     else:
-        xl = np.linspace(0, mh_cart[0])
-        yl = np.linspace(0, mh_cart[1])
-        zl = np.linspace(0, mh_cart[2])
-        idx = np.random.randint(50, 100, (1, 3))[0]
+        xl = np.linspace(0, mh_cart[0], 101)
+        yl = np.linspace(0, mh_cart[1], 101)
+        zl = np.linspace(0, mh_cart[2], 101)
+        idx = np.random.randint(50, 101, 3)
         mh_cart2 = np.array([xl[idx[0]], yl[idx[1]], zl[idx[2]]])
         mtraj = traject_generator(params.n, mh_cart, mh_cart2, params.mtraj)
 
+    print("Generating maternal model...")
     m_model = add_cardiacdipole(
         params.n, params.fs, gp_m, L_m, theta_m, w_m, params.mres, R_m, epos.T, mtraj
     )
-    m_model.type = 1
     L_f = np.eye(3)
-    R_f = 0.1
+    R_fh = 0.1
     f_model = [None] * params.NB_FOETUSES
-    w_f = [None] * params.NB_FOETUSES
-    theta_f = [None] * params.NB_FOETUSES
-    gp_f = [None] * params.NB_FOETUSES
-    selvcgf = [None] * params.NB_FOETUSES
 
     for fet in range(params.NB_FOETUSES):
-        fh_cart = param.fheart[fet].copy()
-        fh_cart[0], fh_cart[1] = pol2cart(param.fheart[fet][0], param.fheart[fet][1])
+        print(f"Generating model for fetus {fet + 1}...")
+        fh_cart = pol2cart(
+            params.fheart[fet][0], params.fheart[fet][1], params.fheart[fet][2]
+        )
 
-        if param.posdev:
+        if params.posdev:
             xp, yp, zp = sph2cart(
                 2 * np.pi * np.random.rand(),
                 np.arcsin(2 * np.random.rand() - 1),
-                0.1 * np.random.rand(),
+                R_fh * np.random.rand(),
             )
             posf_start = np.array([xp, yp, zp]) + fh_cart
         else:
             posf_start = fh_cart
 
-        xl = np.linspace(0, posf_start[0])
-        yl = np.linspace(0, posf_start[1])
-        zl = np.linspace(0, posf_start[2])
+        xl = np.linspace(0, posf_start[0], 101)
+        yl = np.linspace(0, posf_start[1], 101)
+        zl = np.linspace(0, posf_start[2], 101)
         idx = np.random.randint(50, 101, 3)
         posf_end = np.array([xl[idx[0]], yl[idx[1]], zl[idx[2]]])
+        ftraj = traject_generator(params.n, posf_start, posf_end, params.ftraj[fet])
         gp_f = {"norm": build_gauss_parameters("normal", params.fvcg[fet])}
         if params.mectb:
             gp_f["ectopic"] = build_gauss_parameters("ectopic")
@@ -105,91 +107,82 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
                     gp_f["ectopic"][axis][param] *= np.max(np.abs(VCGnorm)) / np.max(
                         np.abs(VCGect)
                     )
-        theta0_f = (2 * np.random.rand() - 1) * np.pi
+        if params.posdev:
+            theta0_f = (2 * np.random.rand() - 1) * np.pi
+            r0 = (2 * np.random.rand(3) - 1) * np.pi
+            R_f = r0
+        else:
+            theta0_f = -np.pi / 2
+            R_f = np.array([-3 * np.pi / 4, 0, -np.pi / 2])
+
         HRV = HRVParameters(
             hr=params.fhr[fet],
+            lfhfr=0.8,
+            hrstd=3,
             flo=params.fres[fet],
             acc=params.facc[fet],
             typeacc=params.ftypeacc[fet],
             accmean=params.faccmean[fet],
             accstd=params.faccstd[fet],
         )
-        theta_f[fet], w_f[fet] = generate_hrv(HRV, params.n, params.fs, theta0_f)
-        traj = traject_generator(param.n, posf_start, posf_end, param.ftraj[fet])
+        theta_f, w_f = generate_hrv(HRV, params.n, params.fs, theta0_f)
 
         f_model[fet] = add_cardiacdipole(
-            param.n,
-            param.fs,
+            params.n,
+            params.fs,
             gp_f,
             L_f,
             theta_f,
             w_f,
-            param.fres[fet],
-            #            SimpleNamespace(x=0, y=0, z=0),
-            epos,
-            traj,
+            params.fres[fet],
+            R_f,
+            epos.T,
+            ftraj,
         )
-        f_model[fet].type = 2
-    # # =========================
-    # # == NOISE
-    # # =========================
-    # n_model = []
+        f_model[fet].ntype = 2
+    n_model = [None] * params.NB_FOETUSES
 
-    # for n in range(NB_NOISES):
-    #     print(f"Generating model for noise source {n+1} ..")
+    for n in range(params.NB_FOETUSES):
+        print(f"Generating model for noise source {n + 1} ..")
 
-    #     xn, yn = pol2cart(2*np.pi*np.random.rand(), 0.1*np.random.rand())
-    #     pos_noise = np.array([
-    #         xn, yn,
-    #         0.1*np.random.rand() - (0.5*(n % 2))
-    #     ])
+        xn, yn = pol2cart(2 * np.pi * np.random.rand(), 0.1 * np.random.rand())
+        pos_noise = np.array([xn, yn, 0.1 * np.random.rand() - (0.5 * (n % 2))])
 
-    #     model, tmp_handle, noise_misc = add_noisedipole(
-    #         param.n, param.fs,
-    #         param.ntype[n],
-    #         epos,
-    #         pos_noise,
-    #         debug
-    #     )
+        model = add_noisedipole(
+            params.n,
+            params.fs,
+            params.ntype[n],
+            epos.T,
+            pos_noise,
+        )
 
-    #     model["SNRfct"] = param.noise_fct[n]
-    #     model["pos"] = pos_noise
-    #     model["type"] = 3
-    #     n_model.append(model)
+        model.SNRfct = params.noise_fct[n]
+        n_model[n] = model
     #  # =========================
     # # == QRS
     # # =========================
-    # mqrs = phase2qrs(m_model["theta"])
-    # fqrs = [phase2qrs(f["theta"]) for f in f_model]
-
+    mqrs = phase2qrs(m_model.theta)
+    fqrs = [phase2qrs(f.theta) for f in f_model]
     # # =========================
     # # == MIXING
     # # =========================
-    # print("Projecting dipoles...")
-    # mixture, mecg, fecg, noise, ecg_f_handle = generate_ecg_mixture(
-    #     debug, param.SNRfm, param.SNRmn,
-    #     mqrs, fqrs, param.fs,
-    #     m_model, *f_model, *n_model
-    # )
+    print("Projecting dipoles...")
+    mixture, mecg, fecg, noise = generate_ecg_mixture(
+        params.SNRfm, params.SNRmn, mqrs, fqrs, params.fs, m_model, *f_model, *n_model
+    )
 
     # # =========================
     # # == GROUND REMOVAL
     # # =========================
-    # ground = mixture[-1, :]
-    # mixture = mixture[:-1, :] - ground
+    ground = mixture[-1, :]
+    mixture = mixture[:-1, :] - ground
 
-    # ground = mecg[-1, :]
-    # mecg = mecg[:-1, :] - ground
+    ground = mecg[-1, :]
+    mecg = mecg[:-1, :] - ground
 
-    # fecg = [
-    #     f[:-1, :] - f[-1, :]
-    #     for f in fecg
-    # ] if fecg else []
+    fecg = [f[:-1, :] - f[-1, :] for f in fecg] if fecg else []
 
-    # noise = [
-    #     n[:-1, :] - n[-1, :]
-    #     for n in noise
-    # ] if noise else []
+    noise = [n[:-1, :] - n[-1, :] for n in noise] if noise else []
 
     # # =========================
     # # == OUTPUT
