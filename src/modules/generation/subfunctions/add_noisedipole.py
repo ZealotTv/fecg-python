@@ -6,7 +6,7 @@ from scipy.signal import butter, filtfilt, zpk2tf
 from sklearn.decomposition import PCA
 
 from .aryule import aryule
-from .datatypes import DmodelParameters
+from .datatypes import NDmodelParameters
 
 data_path = "src/modules/generation/subfunctions/data/noise_sources/"
 
@@ -17,7 +17,7 @@ def add_noisedipole(
     ntype: str = "MA",
     epos: np.ndarray = np.array([[1, 2, 3]]),
     noisepos: np.ndarray = np.array([[4, 5, 6]]),
-) -> DmodelParameters:
+) -> NDmodelParameters:
     AR_ORDER = 12
     FS_NSTDB = 360
     NP_NSTDB = 20 * FS_NSTDB
@@ -71,5 +71,5 @@ def add_noisedipole(
     diff = epos - np.tile(noisepos, (NB_EL, 1))
     den_norm = np.diag(1 / np.sqrt(np.sum(diff**2, axis=1)) ** 3)
     H = den_norm @ diff
-    dmodel = DmodelParameters(H=H, VCG=noise_ar.T, ntype=3)
+    dmodel = NDmodelParameters(H, noise_ar.T, 3)
     return dmodel

@@ -1,20 +1,20 @@
 import numpy as np
 from subfunctions import (
     GaussParameters,
+    GeneratorOut,
     HRVParameters,
     SimulationParameters,
-    GeneratorOut,
     add_cardiacdipole,
-    generate_ecg_mixture,
+    add_noisedipole,
     build_gauss_parameters,
     cart2pol,
     ecg_model,
+    generate_ecg_mixture,
     generate_hrv,
     phase2qrs,
     pol2cart,
     sph2cart,
     traject_generator,
-    add_noisedipole,
 )
 
 
@@ -34,7 +34,7 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     r_m = 0.05
     L_m = np.eye(3)
     R_m = np.array([0, 0, 0])
-    mh_cart = params.mheart
+    mh_cart = params.mheart.copy()
     mh_cart[0], mh_cart[1] = pol2cart(params.mheart[1], params.mheart[0])
     if params.posdev:
         xp, yp, zp = sph2cart(
@@ -43,7 +43,7 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
             r_m * np.random.rand(),
         )
         mh_cart += np.array([xp, yp, zp])
-    params.mheart[0], params.mheart[1], params.mheart[2] = cart2pol(
+    params.mheart[1], params.mheart[0], params.mheart[2] = cart2pol(
         mh_cart[0], mh_cart[1], mh_cart[2]
     )
     HRV = HRVParameters(
@@ -66,21 +66,20 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
         idx = np.random.randint(50, 101, 3)
         mh_cart2 = np.array([xl[idx[0]], yl[idx[1]], zl[idx[2]]])
         mtraj = traject_generator(params.n, mh_cart, mh_cart2, params.mtraj)
-
-    print("Generating maternal model...")
+    print("Generating maternal model ...")
     m_model = add_cardiacdipole(
         params.n, params.fs, gp_m, L_m, theta_m, w_m, params.mres, R_m, epos.T, mtraj
     )
+    m_model.ntype = 1
+
     L_f = np.eye(3)
     R_fh = 0.1
     f_model = [None] * params.NB_FOETUSES
 
     for fet in range(params.NB_FOETUSES):
-        print(f"Generating model for fetus {fet + 1}...")
-        fh_cart = pol2cart(
-            params.fheart[fet][0], params.fheart[fet][1], params.fheart[fet][2]
-        )
-
+        print(f"Generating model for fetus {fet + 1} ...")
+        fh_cart = params.fheart[fet].copy()
+        fh_cart[0], fh_cart[1] = pol2cart(params.fheart[fet][1], params.fheart[fet][0])
         if params.posdev:
             xp, yp, zp = sph2cart(
                 2 * np.pi * np.random.rand(),
@@ -143,9 +142,9 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     n_model = [None] * params.NB_FOETUSES
 
     for n in range(params.NB_FOETUSES):
-        print(f"Generating model for noise source {n + 1} ..")
+        print(f"Generating model for noise source {n + 1} ...")
 
-        xn, yn = pol2cart(2 * np.pi * np.random.rand(), 0.1 * np.random.rand())
+        xn, yn = pol2cart(0.1 * np.random.rand(), 2 * np.pi * np.random.rand())
         pos_noise = np.array([xn, yn, 0.1 * np.random.rand() - (0.5 * (n % 2))])
 
         model = add_noisedipole(
@@ -158,14 +157,9 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
 
         model.SNRfct = params.noise_fct[n]
         n_model[n] = model
-    #  # =========================
-    # # == QRS
-    # # =========================
     mqrs = phase2qrs(m_model.theta)
     fqrs = [phase2qrs(f.theta) for f in f_model]
-    # # =========================
-    # # == MIXING
-    # # =========================
+
     print("Projecting dipoles...")
     mixture, mecg, fecg, noise = generate_ecg_mixture(
         params.SNRfm, params.SNRmn, mqrs, fqrs, params.fs, m_model, *f_model, *n_model
@@ -174,31 +168,12 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     # # =========================
     # # == GROUND REMOVAL
     # # =========================
-    ground = mixture[-1, :]
-    mixture = mixture[:-1, :] - ground
-
-    ground = mecg[-1, :]
-    mecg = mecg[:-1, :] - ground
+    mixture = mixture[:-1, :] - mixture[-1, :]
+    mecg = mecg[:-1, :] - mecg[-1, :]
 
     fecg = [f[:-1, :] - f[-1, :] for f in fecg] if fecg else []
 
     noise = [n[:-1, :] - n[-1, :] for n in noise] if noise else []
 
-    # # =========================
-    # # == OUTPUT
-    # # =========================
-    # out = {
-    #     "mixture": mixture,
-    #     "mecg": mecg,
-    #     "fecg": fecg,
-    #     "noise": noise,
-    #     "m_model": m_model,
-    #     "f_model": f_model,
-    #     "mqrs": mqrs,
-    #     "fqrs": fqrs,
-    #     "param": param,
-    #     "selvcgm": selvcgm,
-    #     "selvcgf": selvcgf
-    # }
-
-    # return out
+    out = GeneratorOut(mixture, mecg, fecg, noise, m_model, f_model, mqrs, fqrs, params)
+    return out

@@ -1,7 +1,7 @@
 from .load_gauss_parameters import load_gauss_parameters
 
 
-def build_gauss_parameters(gauss_type, mvcg=None):
+def build_gauss_parameters(gauss_type: str, mvcg=None) -> dict:
     dims = ("x", "y", "z")
     fields = ("alpha", "beta", "theta")
 

@@ -1,9 +1,9 @@
-from numpy import concatenate, correlate
+from numpy import concatenate, correlate, ndarray
 from numpy.linalg import solve
 from scipy.linalg import toeplitz
 
 
-def aryule(x, order):
+def aryule(x: ndarray, order: int) -> ndarray:
     r = correlate(x, x, mode="full")
     r = r[len(r) // 2 :]
     R = toeplitz(r[:order])

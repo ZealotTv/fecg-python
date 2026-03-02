@@ -1,13 +1,15 @@
 from .add_cardiacdipole import add_cardiacdipole
 from .add_noisedipole import add_noisedipole
 from .build_gauss_parameters import build_gauss_parameters
+from .debug_plots import debug_plots
 from .coordinate_conversion import cart2pol, cart2sph, pol2cart, sph2cart
 from .datatypes import (
-    DmodelParameters,
     GaussParameters,
-    HRVParameters,
-    SimulationParameters,
     GeneratorOut,
+    HDmodelParameters,
+    HRVParameters,
+    NDmodelParameters,
+    SimulationParameters,
 )
 from .ecg_model import ecg_model
 from .generate_ecg_mixture import generate_ecg_mixture
@@ -20,25 +22,22 @@ __all__ = [
     "GaussParameters",
     "HRVParameters",
     "SimulationParameters",
-    "DmodelParameters",
+    "HDmodelParameters",
+    "NDmodelParameters",
     "GeneratorOut",
-
     "ecg_model",
     "generate_ecg_mixture",
-
     "generate_hrv",
     "traject_generator",
-
     "add_cardiacdipole",
     "add_noisedipole",
-
     "build_gauss_parameters",
     "load_gauss_parameters",
     "phase2qrs",
-
     "pol2cart",
     "cart2pol",
     "sph2cart",
+    "debug_plots",
     "cart2sph",
 ]
 __version__ = "1.0.0"

@@ -3,7 +3,7 @@ from resampy import resample
 from scipy.interpolate import interp1d
 
 
-def generate_breathing(fs: int = 1000, N: int = 250, fres: int = 1000):
+def generate_breathing(fs: int = 1000, N: int = 250, fres: int = 1000) -> np.ndarray:
     deltaA = 0.3
     fa = 0.1
     deltaF = 0.05

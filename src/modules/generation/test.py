@@ -19,18 +19,20 @@
 #     fheart=np.array(
 #         [
 #             [-np.pi / 5, 0.35, -0.3],
-#             [-np.pi / 10, 0.35, -0.3],
-#             [-np.pi / 10, 0.35, -0.3],
-#             [-np.pi / 10, 0.35, -0.3],
+#             # [-np.pi / 10, 0.35, -0.3],
+#             # [-np.pi / 10, 0.35, -0.3],
+#             # [-np.pi / 10, 0.35, -0.3],
 #         ]
 #     ),
 #     ntype=np.array(
 #         [
 #             "MA",
-#             "EM",
-#             "MA",
-#             "BW",
+#             # "EM",
+#             # "MA",
+#             # "BW",
 #         ]
 #     ),
 # )
-# pprint(generate_ecg(lal))
+# out = generate_ecg(lal)
+
+# debug_plots(out, 4)

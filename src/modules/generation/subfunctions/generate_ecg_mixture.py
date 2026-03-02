@@ -1,7 +1,9 @@
 import numpy as np
 
 
-def generate_ecg_mixture(SNRfm, SNRmn, mqrs, fqrs, fs, *sources):
+def generate_ecg_mixture(
+    SNRfm: int, SNRmn: int, mqrs: np.ndarray, fqrs: np.ndarray, fs: int, *sources
+) -> np.ndarray:
     NB_EL = sources[0].H.shape[0]
     NB_SAMPS = sources[0].VCG.shape[1]
 
@@ -84,4 +86,4 @@ def generate_ecg_mixture(SNRfm, SNRmn, mqrs, fqrs, fs, *sources):
             mixture += nblock
             noise.append(nblock)
 
-    return mixture, mecg, fecg, noise
+    return mixture, mecg * (-1), fecg, noise

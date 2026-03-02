@@ -1,14 +1,16 @@
-from .dmodel_parameters import DmodelParameters
 from .gauss_parameters import GaussParameters
-from .hrv_parameters import HRVParameters
-from .simulation_parameters import SimulationParameters
 from .generator_out import GeneratorOut
+from .hdmodel_parameters import HDmodelParameters
+from .hrv_parameters import HRVParameters
+from .ndmodel_parameters import NDmodelParameters
+from .simulation_parameters import SimulationParameters
 
 __all__ = [
     "GaussParameters",
     "HRVParameters",
     "SimulationParameters",
-    "DmodelParameters",
+    "HDmodelParameters",
+    "NDmodelParameters",
     "GeneratorOut",
 ]
 version = "1.0.0"

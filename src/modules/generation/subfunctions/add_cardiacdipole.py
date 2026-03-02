@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.signal import butter, filtfilt
 
-from .datatypes import DmodelParameters
+from .datatypes import HDmodelParameters
 from .generate_breathing import generate_breathing
 from .rotate_xyz import rotate_xyz
 
@@ -17,7 +17,7 @@ def add_cardiacdipole(
     R0: np.ndarray,
     epos: np.ndarray,
     traj: np.ndarray,
-) -> DmodelParameters:
+) -> HDmodelParameters:
     ect = False
     if "ectopic" in gp_all:
         ect = True
@@ -128,7 +128,7 @@ def add_cardiacdipole(
         VCG[i, :] -= filtfilt(B, A, VCG[i, :])
         VCG[i, :] /= np.max(np.abs(VCG[i, :]))
 
-    dmodel = DmodelParameters(
+    dmodel = HDmodelParameters(
         H, VCG, theta, traj, STM, RESP_ANG_X, RESP_ANG_Y, RESP_ANG_Z, HEART_T_RESP
     )
     if ect:
