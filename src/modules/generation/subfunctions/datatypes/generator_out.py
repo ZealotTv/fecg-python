@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 import numpy as np
 
@@ -17,3 +17,6 @@ class GeneratorOut:
     mqrs: np.ndarray
     fqrs: np.ndarray
     params: SimulationParameters
+
+    def to_dict(self):
+        return asdict(self)

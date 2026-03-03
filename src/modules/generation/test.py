@@ -1,5 +1,6 @@
 # from pprint import pprint
 # import warnings
+# import pickle
 
 # warnings.filterwarnings("ignore")
 # x = np.pi / 12 * np.array([3, 4, 5, 6, 7, 8, 9, 10]) - np.pi / 2
@@ -35,4 +36,5 @@
 # )
 # out = generate_ecg(lal)
 
-# debug_plots(out, 4)
+# with open("temp.pkl", "wb") as f:
+#     pickle.dump(out.to_dict(), f)
