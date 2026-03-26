@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 from .aryule import aryule
 from .datatypes import NDmodelParameters
 
-data_path = "src/modules/generation/subfunctions/data/noise_sources/"
+data_path = "src/modules/subfunctions/data/noise_sources/"
 
 
 def add_noisedipole(

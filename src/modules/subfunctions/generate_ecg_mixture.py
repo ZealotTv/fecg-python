@@ -79,11 +79,11 @@ def generate_ecg_mixture(
         sigpow = np.sum(np.sum(sig, axis=2) ** 2, axis=1)
         meannoisepow = np.mean(sigpow)
 
-        p = np.sqrt(powerm / meannoisepow) * 10 * (-SNRmn / 20)
+        p = np.sqrt(powerm / meannoisepow) * 10 ** (-SNRmn / 20)
 
         for i, nsrc in enumerate(signaln):
             nblock = noisegain[i] * (p * nsrc)
             mixture += nblock
             noise.append(nblock)
 
-    return mixture, mecg * (-1), fecg, noise
+    return mixture, mecg, fecg, noise

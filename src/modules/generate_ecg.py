@@ -1,5 +1,5 @@
 import numpy as np
-from subfunctions import (
+from .subfunctions import (
     GaussParameters,
     GeneratorOut,
     HRVParameters,
@@ -142,28 +142,45 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     n_model = [None] * params.NB_FOETUSES
 
     for n in range(params.NB_FOETUSES):
-        print(f"Generating model for noise source {n + 1} ...")
+        if params.ntype[n]:
+            print(f"Generating model for noise source {n + 1} ...")
+            xn, yn = pol2cart(0.1 * np.random.rand(), 2 * np.pi * np.random.rand())
+            pos_noise = np.array([xn, yn, 0.1 * np.random.rand() - (0.5 * (n % 2))])
+            model = add_noisedipole(
+                params.n,
+                params.fs,
+                params.ntype[n],
+                epos.T,
+                pos_noise,
+            )
 
-        xn, yn = pol2cart(0.1 * np.random.rand(), 2 * np.pi * np.random.rand())
-        pos_noise = np.array([xn, yn, 0.1 * np.random.rand() - (0.5 * (n % 2))])
-
-        model = add_noisedipole(
-            params.n,
-            params.fs,
-            params.ntype[n],
-            epos.T,
-            pos_noise,
-        )
-
-        model.SNRfct = params.noise_fct[n]
-        n_model[n] = model
+            model.SNRfct = params.noise_fct[n]
+            n_model[n] = model
     mqrs = phase2qrs(m_model.theta)
     fqrs = [phase2qrs(f.theta) for f in f_model]
 
     print("Projecting dipoles...")
-    mixture, mecg, fecg, noise = generate_ecg_mixture(
-        params.SNRfm, params.SNRmn, mqrs, fqrs, params.fs, m_model, *f_model, *n_model
-    )
+    if None in n_model:
+        mixture, mecg, fecg, noise = generate_ecg_mixture(
+            params.SNRfm,
+            params.SNRmn,
+            mqrs,
+            fqrs,
+            params.fs,
+            m_model,
+            *f_model,
+        )
+    else:
+        mixture, mecg, fecg, noise = generate_ecg_mixture(
+            params.SNRfm,
+            params.SNRmn,
+            mqrs,
+            fqrs,
+            params.fs,
+            m_model,
+            *f_model,
+            *n_model,
+        )
 
     # # =========================
     # # == GROUND REMOVAL
