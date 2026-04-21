@@ -35,8 +35,7 @@ def add_cardiacdipole(
     RESP_ANG_Y = 2 * 0.08
     RESP_ANG_Z = 2 * 0.07
     HEART_T_RESP = 0.05
-
-    NB_EL = epos.shape[1]
+    NB_EL = epos.shape[0]
     dt = 1 / fs
 
     VCG = np.zeros((3, N))
@@ -108,11 +107,9 @@ def add_cardiacdipole(
         thetaz = R0[2] + RESP_ANG_Z * brwave[i]
 
         R = rotate_xyz(thetax, thetay, thetaz)
-
         VCG[:, i] = R @ L @ np.array([X, Y, Z])
-
         if traj.shape[0] > 1:
-            dr = dpos[i]
+            dr = np.matlib.repmat(dpos[i], NB_EL, 1)
             diff = epos - dr
             den_norm = 1.0 / np.sqrt(np.sum(diff**2, axis=1)) ** 3
             h_1 = np.diag(den_norm) @ diff

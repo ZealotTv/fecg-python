@@ -38,11 +38,11 @@ class SimulationParameters:
     ftypeacc: np.ndarray = field(init=False)
     faccmean: np.ndarray = field(init=False)
     faccstd: np.ndarray = field(init=False)
-    ftraj: np.ndarray = field(init=False)
+    ftraj: np.ndarray = field(default_factory=lambda: np.array([""]))
     mtraj: str = "none"
     fname: str = "aecg"
     mres: int = 0
-    fres: np.ndarray = field(init=False)
+    fres: np.ndarray = field(default_factory=lambda: np.array([0]))
     mvcg: np.ndarray = field(default_factory=lambda: np.random.randint(0, 8))
     fvcg: np.ndarray = field(init=False)
     evcg: np.ndarray = field(default_factory=lambda: np.random.randint(0, 3))
@@ -58,6 +58,4 @@ class SimulationParameters:
         self.ftypeacc = np.tile("nsr", self.NB_FOETUSES)
         self.faccmean = np.tile(0, self.NB_FOETUSES)
         self.faccstd = np.tile(1, self.NB_FOETUSES)
-        self.ftraj = np.tile("none", self.NB_FOETUSES)
-        self.fres = np.zeros(self.NB_FOETUSES)
         self.fvcg = np.random.randint(0, 8, self.NB_FOETUSES)

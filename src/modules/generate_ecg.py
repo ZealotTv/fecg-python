@@ -54,7 +54,7 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
         accmean=params.maccmean,
         accstd=params.maccstd,
     )
-    theta_m, w_m = generate_hrv(HRV)
+    theta_m, w_m = generate_hrv(HRV, params.n, params.fs)
     Xc, Yc = pol2cart(elpos[:, 1], elpos[:, 0])
     epos = np.array([Xc, Yc, elpos[:, 2]])
     if params.mtraj == "none":
@@ -66,7 +66,7 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
         idx = np.random.randint(50, 101, 3)
         mh_cart2 = np.array([xl[idx[0]], yl[idx[1]], zl[idx[2]]])
         mtraj = traject_generator(params.n, mh_cart, mh_cart2, params.mtraj)
-    print("Generating maternal model ...")
+    #    print("Generating maternal model ...")
     m_model = add_cardiacdipole(
         params.n, params.fs, gp_m, L_m, theta_m, w_m, params.mres, R_m, epos.T, mtraj
     )
@@ -143,7 +143,7 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
 
     for n in range(params.NB_FOETUSES):
         if params.ntype[n]:
-            print(f"Generating model for noise source {n + 1} ...")
+            #            print(f"Generating model for noise source {n + 1} ...")
             xn, yn = pol2cart(0.1 * np.random.rand(), 2 * np.pi * np.random.rand())
             pos_noise = np.array([xn, yn, 0.1 * np.random.rand() - (0.5 * (n % 2))])
             model = add_noisedipole(
@@ -159,7 +159,7 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     mqrs = phase2qrs(m_model.theta)
     fqrs = [phase2qrs(f.theta) for f in f_model]
 
-    print("Projecting dipoles...")
+    #    print("Projecting dipoles...")
     if None in n_model:
         mixture, mecg, fecg, noise = generate_ecg_mixture(
             params.SNRfm,
