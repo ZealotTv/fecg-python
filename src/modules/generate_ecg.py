@@ -18,7 +18,7 @@ from .subfunctions import (
 )
 
 
-def generate_ecg(params: SimulationParameters) -> GeneratorOut:
+def generate_ecg(params: SimulationParameters, ground=False) -> GeneratorOut:
     elpos = np.vstack([params.elpos, params.refpose])
     gp_m = {"norm": build_gauss_parameters("normal", params.mvcg)}
     if params.mectb:
@@ -77,7 +77,6 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     f_model = [None] * params.NB_FOETUSES
 
     for fet in range(params.NB_FOETUSES):
-        print(f"Generating model for fetus {fet + 1} ...")
         fh_cart = params.fheart[fet].copy()
         fh_cart[0], fh_cart[1] = pol2cart(params.fheart[fet][1], params.fheart[fet][0])
         if params.posdev:
@@ -143,7 +142,6 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
 
     for n in range(params.NB_FOETUSES):
         if params.ntype[n]:
-            #            print(f"Generating model for noise source {n + 1} ...")
             xn, yn = pol2cart(0.1 * np.random.rand(), 2 * np.pi * np.random.rand())
             pos_noise = np.array([xn, yn, 0.1 * np.random.rand() - (0.5 * (n % 2))])
             model = add_noisedipole(
@@ -159,7 +157,6 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     mqrs = phase2qrs(m_model.theta)
     fqrs = [phase2qrs(f.theta) for f in f_model]
 
-    #    print("Projecting dipoles...")
     if None in n_model:
         mixture, mecg, fecg, noise = generate_ecg_mixture(
             params.SNRfm,
@@ -185,12 +182,13 @@ def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     # # =========================
     # # == GROUND REMOVAL
     # # =========================
-    mixture = mixture[:-1, :] - mixture[-1, :]
-    mecg = mecg[:-1, :] - mecg[-1, :]
+    if ground:
+        mixture = mixture[:-1, :] - mixture[-1, :]
+        mecg = mecg[:-1, :] - mecg[-1, :]
 
-    fecg = [f[:-1, :] - f[-1, :] for f in fecg] if fecg else []
+        fecg = [f[:-1, :] - f[-1, :] for f in fecg] if fecg else []
 
-    noise = [n[:-1, :] - n[-1, :] for n in noise] if noise else []
+        noise = [n[:-1, :] - n[-1, :] for n in noise] if noise else []
 
     out = GeneratorOut(mixture, mecg, fecg, noise, m_model, f_model, mqrs, fqrs, params)
     return out

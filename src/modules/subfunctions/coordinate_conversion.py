@@ -8,7 +8,7 @@ import numpy as np
 def cart2pol(x: np.ndarray, y: np.ndarray, z=None) -> np.ndarray:
     rho = np.sqrt(x**2 + y**2)
     phi = np.arctan2(y, x)
-    if z:
+    if z is not None:
         return rho, phi, z
     return rho, phi
 
@@ -16,7 +16,7 @@ def cart2pol(x: np.ndarray, y: np.ndarray, z=None) -> np.ndarray:
 def pol2cart(rho: np.ndarray, phi: np.ndarray, z=None) -> np.ndarray:
     x = rho * np.cos(phi)
     y = rho * np.sin(phi)
-    if z:
+    if z is not None:
         return x, y, z
     return x, y
 
