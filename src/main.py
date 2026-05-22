@@ -24,8 +24,8 @@ def process_comb(comb_ref_id, all_mix, all_fecg, fs):
         score_current = np.round(corr_vals.mean(), 3)
         scores_across_foetus.append(score_current)
 
-    # pair_score = np.round(np.median(scores_across_foetus), 3)
-    return scores_across_foetus
+    pair_score = np.round(np.median(scores_across_foetus), 3)
+    return (pair_score, comb_ref_id)
 
 
 def main_parallel(fs, all_mix, all_fecg, comb_ref):
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     points_cyl = np.column_stack((phi_flat, r_flat, z_flat))
 
     fs = 200
-    combs = list(combinations(range(points_cyl.shape[0]), 4))
+    combs = list(combinations(range(points_cyl.shape[0]), 3))
     top_n = 30
 
     all_mix = []
@@ -142,13 +142,11 @@ if __name__ == "__main__":
             if ref in comb:
                 continue
             comb_ref.append([*comb, ref])
-    results = main_parallel(
-        fs=fs, all_mix=all_mix, all_fecg=all_fecg, comb_ref=comb_ref
-    )
+    reults = main_parallel(fs=fs, all_mix=all_mix, all_fecg=all_fecg, comb_ref=comb_ref)
 
     print("Done!")
-    results.sort(key=lambda x: x[0], reverse=True)
-    top_30 = results[:top_n]
+    reults.sort(key=lambda x: x[0], reverse=True)
+    top_30 = reults[:top_n]
 
     print(f"\nTop {top_n} triples:\n")
     for rank, (score, comb_ref_id) in enumerate(top_30, 1):
