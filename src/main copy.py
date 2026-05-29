@@ -53,11 +53,17 @@ if __name__ == "__main__":
     W = 0.3
 
     # HEARTS
-    N_PHI_HEARTS = 8
+    N_PHI_HEARTS_RIGHT = 5
+    N_PHI_HEARTS_LEFT = 3
     N_Z_HEARTS = 3
-    N_R = 3
-    phi_hearts = np.linspace(-5 * np.pi / 18, np.pi / 6, N_PHI_HEARTS)
-    z_lin_hearts = np.linspace(-0.35, 0.0, N_Z_HEARTS)
+    N_R = 2
+    phi_right_hearts = np.linspace(-5 * np.pi / 18, 0, N_PHI_HEARTS_RIGHT)
+    phi_left_hearts = np.linspace(np.pi / 12, np.pi / 6, N_PHI_HEARTS_LEFT)
+    phi_hearts = np.concatenate([phi_right_hearts, phi_left_hearts])
+    z_low_hearts = np.linspace(-0.35, -0.07, N_Z_HEARTS)
+    z_high_hearts = np.array([0.04])
+    z_lin_hearts = np.concatenate([z_low_hearts, z_high_hearts])
+
     d_vals = np.linspace(0.04, 0.11, N_R)
     phi_3d, z_3d, d_3d = np.meshgrid(phi_hearts, z_lin_hearts, d_vals, indexing="ij")
     R_base_pts = R_CHEST * np.exp(-A * (z_3d - 0.3) ** 2) + R_HIPS * np.exp(
@@ -82,12 +88,12 @@ if __name__ == "__main__":
     N_PHI_PTS_RIGHT = 6
     N_PHI_PTS_LEFT = 3
     N_Z_PTS = 3
-    z_low = np.linspace(-0.35, -0.1, N_Z_PTS)
-    z_high = np.array([0.07])
-    z_lin_pts = np.concatenate([z_low, z_high])
-    phi_right = np.linspace(-np.pi / 3, 0, N_PHI_PTS_RIGHT)
-    phi_left = np.linspace(np.pi / 12, np.pi / 4, N_PHI_PTS_LEFT)
-    phi_pts = np.concatenate([phi_right, phi_left])
+    z_low_pts = np.linspace(-0.35, -0.1, N_Z_PTS)
+    z_high_pts = np.array([0.07])
+    z_lin_pts = np.concatenate([z_low_pts, z_high_pts])
+    phi_right_pts = np.linspace(-np.pi / 3, 0, N_PHI_PTS_RIGHT)
+    phi_left_pts = np.linspace(np.pi / 12, np.pi / 4, N_PHI_PTS_LEFT)
+    phi_pts = np.concatenate([phi_right_pts, phi_left_pts])
     phi_pts, z_lin_pts = np.meshgrid(phi_pts, z_lin_pts)
     R_base_pts = R_CHEST * np.exp(-A * (z_lin_pts - 0.3) ** 2) + R_HIPS * np.exp(
         -C * (z_lin_pts + 0.3) ** 2
