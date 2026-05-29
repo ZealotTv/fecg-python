@@ -749,7 +749,7 @@ def filter_pipe(fs, signal_mixture):
 def pipeline(fs, filtered):
     interp_factor = 4
     fs_new = fs * interp_factor
-    ICA = FastICA(3)
+    ICA = FastICA(filtered.shape[0])
     component = ICA.fit_transform(filtered.T)
     comp_int = resample(component, np.round(len(component) * interp_factor))
     mqrs = FecgQRSmDet(comp_int, fs_new)

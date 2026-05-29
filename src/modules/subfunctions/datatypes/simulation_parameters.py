@@ -49,6 +49,7 @@ class SimulationParameters:
     posdev: int = 1
     mectb: int = 0
     fectb: int = 0
+    ground: bool = False
 
     def __post_init__(self):
         self.NB_FOETUSES = np.size(self.fheart, 0)

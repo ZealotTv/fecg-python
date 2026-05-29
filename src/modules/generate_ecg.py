@@ -18,7 +18,7 @@ from .subfunctions import (
 )
 
 
-def generate_ecg(params: SimulationParameters, ground=False) -> GeneratorOut:
+def generate_ecg(params: SimulationParameters) -> GeneratorOut:
     elpos = np.vstack([params.elpos, params.refpose])
     gp_m = {"norm": build_gauss_parameters("normal", params.mvcg)}
     if params.mectb:
@@ -66,7 +66,6 @@ def generate_ecg(params: SimulationParameters, ground=False) -> GeneratorOut:
         idx = np.random.randint(50, 101, 3)
         mh_cart2 = np.array([xl[idx[0]], yl[idx[1]], zl[idx[2]]])
         mtraj = traject_generator(params.n, mh_cart, mh_cart2, params.mtraj)
-    #    print("Generating maternal model ...")
     m_model = add_cardiacdipole(
         params.n, params.fs, gp_m, L_m, theta_m, w_m, params.mres, R_m, epos.T, mtraj
     )
@@ -107,7 +106,7 @@ def generate_ecg(params: SimulationParameters, ground=False) -> GeneratorOut:
                     )
         if params.posdev:
             theta0_f = (2 * np.random.rand() - 1) * np.pi
-            r0 = (2 * np.random.rand(3) - 1) * np.pi
+            r0 = -(np.random.rand(3) - 0.5) * np.pi
             R_f = r0
         else:
             theta0_f = -np.pi / 2
@@ -182,7 +181,7 @@ def generate_ecg(params: SimulationParameters, ground=False) -> GeneratorOut:
     # # =========================
     # # == GROUND REMOVAL
     # # =========================
-    if ground:
+    if params.ground:
         mixture = mixture[:-1, :] - mixture[-1, :]
         mecg = mecg[:-1, :] - mecg[-1, :]
 
