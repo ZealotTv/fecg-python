@@ -12,6 +12,8 @@ from sklearn.decomposition import FastICA
 
 
 def norm_corr(x, y):
+    x = np.asanyarray(x, dtype=float)
+    y = np.asanyarray(y, dtype=float)
     x = (x - np.mean(x)) / np.std(x)
     y = (y - np.mean(y)) / np.std(y)
     corr = np.correlate(x, y, mode="full")

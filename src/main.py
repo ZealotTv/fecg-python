@@ -133,8 +133,9 @@ if __name__ == "__main__":
             fs=fs,
             n=fs * 20,
             ftraj=np.array(["none"]),
+            ground=False,
         )
-        out = generate_ecg(params, ground=False).to_dict()
+        out = generate_ecg(params).to_dict()
         all_mix.append(filter_pipe(fs, out["mixture"]).T)
         all_fecg.append(out["fecg"][0])
 
