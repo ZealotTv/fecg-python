@@ -230,6 +230,6 @@ if __name__ == "__main__":
             all_fecg=all_fecg,
             comb_ref=comb_ref,
             name=f"data_{i + 1}.pkl",
-            max_pending=50000,
+            max_pending=200000,
             total=total,
         )
